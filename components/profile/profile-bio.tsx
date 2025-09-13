@@ -4,8 +4,8 @@ import { IUser } from '@/types'
 import React, { useState } from 'react'
 import Button from '../ui/button'
 import { IoLocationSharp } from 'react-icons/io5'
-import { BiCalendar, BiBirthdayCake } from 'react-icons/bi'
-import { FaBitcoin, FaCopy } from 'react-icons/fa'
+import { BiCalendar } from 'react-icons/bi'
+import { FaBitcoin, FaCopy, FaBirthdayCake } from 'react-icons/fa'
 import { formatDistanceToNowStrict } from 'date-fns'
 import EditModal from '../modals/edit-modal'
 import useEditModal from '@/hooks/useEditModal'
@@ -157,7 +157,7 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 							)}
 							{user.birthDate && (
 								<div className='flex flex-row items-center gap-2 text-purple-500'>
-									<BiBirthdayCake size={24} />
+									<FaBirthdayCake size={24} />
 									<p>{new Date(user.birthDate).toLocaleDateString()}</p>
 								</div>
 							)}

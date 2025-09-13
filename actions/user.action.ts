@@ -58,7 +58,7 @@ export const getUser = actionClient.schema(idSchema).action<ReturnActionType>(as
 		})
 	} else if (postCount < 5 && badges.includes('rookie')) {
 		// Remove badge if post count drops below 5
-		badges = badges.filter(badge => badge !== 'rookie')
+		badges = badges.filter((badge: string) => badge !== 'rookie')
 		await User.findByIdAndUpdate(id, { 
 			$set: { postCount, badges }
 		})
@@ -161,7 +161,7 @@ export const updateUser = actionClient.schema(updateUserSchema).action<ReturnAct
 		// Convert birthDate string to Date object if it exists
 		const updateData = { ...parsedInput }
 		if (updateData.birthDate) {
-			updateData.birthDate = new Date(updateData.birthDate)
+			updateData.birthDate = updateData.birthDate
 		}
 		
 		await User.findByIdAndUpdate(id, updateData)
