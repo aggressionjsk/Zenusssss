@@ -139,7 +139,7 @@ export const deletePost = actionClient.schema(idSchema).action<ReturnActionType>
 	// Check if user should lose the rookie badge (less than 5 posts)
 	let badges = user?.badges || []
 	if (postCount < 5 && badges.includes('rookie')) {
-		badges = badges.filter((badge: string) => badge !== 'rookie')
+		badges = badges.filter(badge => badge !== 'rookie')
 		await User.findByIdAndUpdate(userId, { 
 			$set: { postCount, badges }
 		})

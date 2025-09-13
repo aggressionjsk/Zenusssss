@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Loader2 } from 'lucide-react'
-import Image from 'next/image'
 
 interface LinkPreviewProps {
   url: string
@@ -102,16 +101,13 @@ const LinkPreview = ({ url }: LinkPreviewProps) => {
       <div className="flex flex-col md:flex-row">
         {metadata.image && (
           <div className="md:w-1/3 h-32 md:h-auto overflow-hidden">
-            <Image 
+            <img 
               src={metadata.image} 
               alt={metadata.title || 'Link preview'} 
               className="w-full h-full object-cover"
-              width={300}
-              height={200}
               onError={(e) => {
                 // Hide image on error
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
+                (e.target as HTMLImageElement).style.display = 'none'
               }}
             />
           </div>

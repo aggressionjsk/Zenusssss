@@ -161,7 +161,7 @@ export const updateUser = actionClient.schema(updateUserSchema).action<ReturnAct
 		// Convert birthDate string to Date object if it exists
 		const updateData = { ...parsedInput }
 		if (updateData.birthDate) {
-			updateData.birthDate = updateData.birthDate
+			updateData.birthDate = new Date(updateData.birthDate)
 		}
 		
 		await User.findByIdAndUpdate(id, updateData)
