@@ -28,6 +28,8 @@ export const userSchema = z.object({
 	username: z.string().min(3),
 	bio: z.string().min(3),
 	location: z.string().min(3),
+	cryptoWallet: z.string().optional(),
+	birthDate: z.date().optional(),
 })
 
 export const paramsSchema = z.object({
@@ -67,5 +69,7 @@ export const updateUserSchema = z
 		username: z.string().min(3).optional(),
 		bio: z.string().min(3).optional(),
 		location: z.string().min(3).optional(),
+		cryptoWallet: z.string().optional(),
+		birthDate: z.string().optional(), // Using string for date from form
 	})
 	.merge(idSchema)

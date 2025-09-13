@@ -44,6 +44,31 @@ export const getUser = actionClient.schema(idSchema).action<ReturnActionType>(as
 	const { id } = parsedInput
 	const user = await User.findById(id)
 	const session = await getServerSession(authOptions)
+	
+	// Get post count for the user
+	const postCount = await Post.countDocuments({ user: id })
+	
+	// Check if user should have the rookie badge (5+ posts)
+	let badges = user?.badges || []
+	if (postCount >= 5 && !badges.includes('rookie')) {
+		badges.push('rookie')
+		// Update user with badge if needed
+		await User.findByIdAndUpdate(id, { 
+			$set: { postCount, badges }
+		})
+	} else if (postCount < 5 && badges.includes('rookie')) {
+		// Remove badge if post count drops below 5
+		badges = badges.filter(badge => badge !== 'rookie')
+		await User.findByIdAndUpdate(id, { 
+			$set: { postCount, badges }
+		})
+	} else if (postCount !== user?.postCount) {
+		// Just update the post count if it changed
+		await User.findByIdAndUpdate(id, { 
+			$set: { postCount }
+		})
+	}
+	
 	const filteredUser = {
 		_id: user?._id,
 		name: user?.name,
@@ -53,10 +78,14 @@ export const getUser = actionClient.schema(idSchema).action<ReturnActionType>(as
 		username: user?.username,
 		bio: user?.bio,
 		location: user?.location,
+		cryptoWallet: user?.cryptoWallet,
+		birthDate: user?.birthDate,
 		createdAt: user?.createdAt,
 		followers: user?.followers?.length || 0,
 		following: user?.following?.length || 0,
 		isFollowing: user?.followers?.includes(session?.currentUser?._id) || false,
+		postCount,
+		badges
 	}
 	return JSON.parse(JSON.stringify({ user: filteredUser }))
 })
@@ -128,7 +157,14 @@ export const updateUser = actionClient.schema(updateUserSchema).action<ReturnAct
 				return { failure: 'Username already exists', status: 400 }
 			}
 		}
-		await User.findByIdAndUpdate(id, parsedInput)
+		
+		// Convert birthDate string to Date object if it exists
+		const updateData = { ...parsedInput }
+		if (updateData.birthDate) {
+			updateData.birthDate = new Date(updateData.birthDate)
+		}
+		
+		await User.findByIdAndUpdate(id, updateData)
 		revalidatePath(`/profile/${id}`)
 		return { status: 200 }
 	}

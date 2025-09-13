@@ -12,6 +12,8 @@ import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import useAction from '@/hooks/use-action'
 import { deleteLike, deletePost, likePost } from '@/actions/post.action'
+import LinkPreview from './link-preview'
+import FormattedText from './formatted-text'
 
 interface Props {
 	post: IPost
@@ -92,7 +94,11 @@ const PostItem = ({ post, user }: Props) => {
 						<span className='text-neutral-500 text-sm'>{formatDistanceToNowStrict(new Date(post.createdAt))} ago</span>
 					</div>
 
-					<div className='text-white mt-1'>{post.body}</div>
+					<div className='text-white mt-1'>
+						<FormattedText content={post.body} />
+					</div>
+
+					{post.linkUrl && <LinkPreview url={post.linkUrl} />}
 
 					<div className='flex flex-row items-center mt-3 gap-10'>
 						<div className='flex flex-row items-center text-neutral-500 gap-2 cursor-pointer transition hover:text-sky-500'>
@@ -105,7 +111,11 @@ const PostItem = ({ post, user }: Props) => {
 							onClick={onLike}
 							role='button'
 						>
-							<FaHeart size={20} color={post.hasLiked ? 'red' : ''} />
+							<FaHeart 
+								size={20} 
+								color={post.hasLiked ? 'red' : ''} 
+								className={`transition-transform duration-300 ${post.hasLiked ? 'scale-125' : 'scale-100'} hover:scale-110`}
+							/>
 							<p>{post.likes || 0}</p>
 						</div>
 

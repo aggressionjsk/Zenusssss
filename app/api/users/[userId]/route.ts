@@ -13,7 +13,12 @@ export async function PUT(req: Request, route: { params: { userId: string } }) {
 		const type = searchParams.get('type')
 
 		if (type === 'updateImage') {
-			await User.findByIdAndUpdate(userId, body, { new: true })
+			// Convert birthDate string to Date object if it exists
+			const updateData = { ...body }
+			if (updateData.birthDate) {
+				updateData.birthDate = new Date(updateData.birthDate)
+			}
+			await User.findByIdAndUpdate(userId, updateData, { new: true })
 			revalidatePath(`/profile/${userId}`)
 			return NextResponse.json({ message: 'User updated successfully' })
 		} else if (type === 'updateFields') {
@@ -25,7 +30,12 @@ export async function PUT(req: Request, route: { params: { userId: string } }) {
 					return NextResponse.json({ error: 'Username already exists' }, { status: 400 })
 				}
 			}
-			await User.findByIdAndUpdate(userId, body, { new: true })
+			// Convert birthDate string to Date object if it exists
+			const updateData = { ...body }
+			if (updateData.birthDate) {
+				updateData.birthDate = new Date(updateData.birthDate)
+			}
+			await User.findByIdAndUpdate(userId, updateData, { new: true })
 			revalidatePath(`/profile/${userId}`)
 			return NextResponse.json({ message: 'User updated successfully' })
 		}

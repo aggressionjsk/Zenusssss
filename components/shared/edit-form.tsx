@@ -12,6 +12,8 @@ import Button from '../ui/button'
 import useEditModal from '@/hooks/useEditModal'
 import useAction from '@/hooks/use-action'
 import { updateUser } from '@/actions/user.action'
+import { DatePicker } from '../ui/date-picker'
+import { useState } from 'react'
 
 interface Props {
 	user: IUser
@@ -21,14 +23,29 @@ const EditForm = ({ user }: Props) => {
 	const { isLoading, onError, setIsLoading } = useAction()
 	const editModal = useEditModal()
 
+	const [birthDate, setBirthDate] = useState<Date | undefined>(user.birthDate ? new Date(user.birthDate) : undefined)
+
 	const form = useForm<z.infer<typeof userSchema>>({
 		resolver: zodResolver(userSchema),
-		defaultValues: { name: user.name || '', username: user.username || '', bio: user.bio || '', location: user.location || '' },
+		defaultValues: { 
+			name: user.name || '', 
+			username: user.username || '', 
+			bio: user.bio || '', 
+			location: user.location || '',
+			cryptoWallet: user.cryptoWallet || ''
+		},
 	})
 
 	const onSubmit = async (values: z.infer<typeof userSchema>) => {
 		setIsLoading(true)
-		const res = await updateUser({ id: user._id, type: 'updateFields', ...values })
+		// Convert birthDate to ISO string if it exists
+		const birthDateString = birthDate ? birthDate.toISOString() : undefined
+		const res = await updateUser({ 
+			id: user._id, 
+			type: 'updateFields', 
+			...values,
+			birthDate: birthDateString
+		})
 		if (res?.serverError || res?.validationErrors || !res?.data) {
 			return onError('Something went wrong')
 		}
@@ -95,6 +112,24 @@ const EditForm = ({ user }: Props) => {
 						</FormItem>
 					)}
 				/>
+
+				<FormField
+					control={form.control}
+					name='cryptoWallet'
+					render={({ field }) => (
+						<FormItem>
+							<FormControl>
+								<Input placeholder='Crypto Wallet Address' disabled={isLoading} {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<div className="space-y-2">
+					<label className="text-sm font-medium">Birth Date</label>
+					<DatePicker date={birthDate} setDate={setBirthDate} />
+				</div>
 
 				<Button type='submit' label={'Save'} secondary large fullWidth disabled={isLoading} isLoading={isLoading} />
 			</form>

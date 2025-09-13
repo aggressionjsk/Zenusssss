@@ -4,7 +4,8 @@ import { IUser } from '@/types'
 import React, { useState } from 'react'
 import Button from '../ui/button'
 import { IoLocationSharp } from 'react-icons/io5'
-import { BiCalendar } from 'react-icons/bi'
+import { BiCalendar, BiBirthdayCake } from 'react-icons/bi'
+import { FaBitcoin, FaCopy } from 'react-icons/fa'
 import { formatDistanceToNowStrict } from 'date-fns'
 import EditModal from '../modals/edit-modal'
 import useEditModal from '@/hooks/useEditModal'
@@ -15,6 +16,7 @@ import FollowUser from '../shared/follow-user'
 import useAction from '@/hooks/use-action'
 import { follow, getFollowUser, unfollow } from '@/actions/user.action'
 import { useSession } from 'next-auth/react'
+import Badge from '../shared/badge'
 
 const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 	const { isLoading, setIsLoading, onError } = useAction()
@@ -23,6 +25,7 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 	const [followers, setFollowers] = useState<IUser[]>([])
 	const [isFetching, setIsFetching] = useState(false)
 	const [state, setState] = useState<'following' | 'followers'>('following')
+	const [copied, setCopied] = useState(false)
 	const editModal = useEditModal()
 
 	const onFollow = async () => {
@@ -92,6 +95,14 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 		}
 	}
 
+	const copyToClipboard = () => {
+		if (user.cryptoWallet) {
+			navigator.clipboard.writeText(user.cryptoWallet)
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		}
+	}
+
 	return (
 		<>
 			<EditModal user={user} />
@@ -108,25 +119,54 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 
 				<div className='mt-8 px-4'>
 					<div className='flex flex-col'>
-						<p className='text-white text-2xl font-semibold'>{user.name}</p>
+						<div className='flex items-center gap-2'>
+							<p className='text-white text-2xl font-semibold'>{user.name}</p>
+							{user.badges?.includes('rookie') && <Badge type='rookie' />}
+						</div>
 					</div>
 
 					<p className='text-md text-neutral-500'>{user.username ? `@${user.username}` : user.email}</p>
 
 					<div className='flex flex-col mt-4'>
-						<p className='text-white'>{user.bio}</p>
-						<div className='flex gap-4 items-center'>
+					<p className='text-white'>{user.bio}</p>
+					<div className='flex gap-4 items-center flex-wrap'>
+						<div className='flex flex-row items-center gap-4 mt-4'>
 							{user.location && (
-								<div className='flex flex-row items-center gap-2 mt-4 text-sky-500'>
+								<div className='flex flex-row items-center gap-2 text-sky-500'>
 									<IoLocationSharp size={24} />
 									<p>{user.location}</p>
 								</div>
 							)}
-							<div className='flex flex-row items-center gap-2 mt-4 text-neutral-500'>
-								<BiCalendar size={24} />
-								<p>Joined {formatDistanceToNowStrict(new Date(user.createdAt))} ago</p>
-							</div>
+							{user.cryptoWallet && (
+								<div className='flex flex-row items-center gap-2 text-amber-500 group relative'>
+									<FaBitcoin size={24} />
+									<p className='truncate max-w-[150px]'>{user.cryptoWallet}</p>
+									<button 
+										onClick={copyToClipboard} 
+										className='ml-2 p-1 rounded-full hover:bg-neutral-800 transition'
+										title='Copy wallet address'
+									>
+										<FaCopy size={16} />
+									</button>
+									{copied && (
+										<div className='absolute -top-8 left-0 bg-amber-500 text-white px-2 py-1 rounded text-sm'>
+											Copied!
+										</div>
+									)}
+								</div>
+							)}
+							{user.birthDate && (
+								<div className='flex flex-row items-center gap-2 text-purple-500'>
+									<BiBirthdayCake size={24} />
+									<p>{new Date(user.birthDate).toLocaleDateString()}</p>
+								</div>
+							)}
 						</div>
+						<div className='flex flex-row items-center gap-2 mt-4 text-neutral-500'>
+							<BiCalendar size={24} />
+							<p>Joined {formatDistanceToNowStrict(new Date(user.createdAt))} ago</p>
+						</div>
+					</div>
 
 						<div className='flex flex-row items-center mt-6 gap-6'>
 							<div className='flex flex-row items-center gap-1 hover:underline cursor-pointer' onClick={openFollowModal}>

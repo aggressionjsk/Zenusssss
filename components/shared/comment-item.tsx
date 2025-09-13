@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import useAction from '@/hooks/use-action'
 import { deleteComment, likeComment, unlikeComment } from '@/actions/comment.action'
+import FormattedText from './formatted-text'
 
 interface Props {
 	comment: IPost
@@ -87,17 +88,23 @@ const CommentItem = ({ comment, user }: Props) => {
 							{comment && comment.createdAt && formatDistanceToNowStrict(new Date(comment.createdAt))}
 						</span>
 					</div>
-					<div className='text-white mt-1'>{comment?.body}</div>
+					<div className='text-white mt-1'>
+						<FormattedText content={comment?.body || ''} />
+					</div>
 
 					<div className='flex flex-row items-center mt-3 gap-10'>
 						<div
-							className={`flex flex-row items-center text-neutral-500 gap-2 cursor-pointer transition hover:text-red-500`}
-							onClick={onLike}
-							role='button'
-						>
-							<FaHeart size={20} color={comment.hasLiked ? 'red' : ''} />
-							<p>{comment.likes || 0}</p>
-						</div>
+						className={`flex flex-row items-center text-neutral-500 gap-2 cursor-pointer transition hover:text-red-500`}
+						onClick={onLike}
+						role='button'
+					>
+						<FaHeart 
+							size={20} 
+							color={comment.hasLiked ? 'red' : ''} 
+							className={`transition-transform duration-300 ${comment.hasLiked ? 'scale-125' : 'scale-100'} hover:scale-110`}
+						/>
+						<p>{comment.likes || 0}</p>
+					</div>
 
 						{comment.user._id === user._id && (
 							<div

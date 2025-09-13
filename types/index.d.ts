@@ -17,11 +17,15 @@ export interface IUser {
 	_id: string
 	bio: string
 	location: string
+	cryptoWallet?: string
+	birthDate?: Date
 	followers: string[]
 	following: string[]
 	hasNewNotifications: boolean
 	notifications: string[]
 	isFollowing: boolean
+	postCount?: number
+	badges?: string[]
 }
 
 export interface IPost {
@@ -33,6 +37,7 @@ export interface IPost {
 	user: IUser
 	_id: string
 	hasLiked: boolean
+	linkUrl?: string
 }
 
 export interface ReturnActionType {

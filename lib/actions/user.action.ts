@@ -21,6 +21,7 @@ export async function getUserById(userId: string) {
 			username: user.username,
 			bio: user.bio,
 			location: user.location,
+			birthDate: user.birthDate,
 			createdAt: user.createdAt,
 			followers: user.followers?.length || 0,
 			following: user.following?.length || 0,

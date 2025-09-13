@@ -7,6 +7,7 @@ const PostSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    linkUrl: String,
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,

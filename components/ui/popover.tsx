@@ -4,10 +4,26 @@ import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
+import { SlotClone } from "./slot"
 
 const Popover = PopoverPrimitive.Root
 
-const PopoverTrigger = PopoverPrimitive.Trigger
+const PopoverTrigger = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Trigger> & {
+    asChild?: boolean
+  }
+>(({ asChild = false, ...props }, ref) => (
+  <PopoverPrimitive.Trigger
+    ref={ref}
+    {...props}
+    asChild={asChild}
+  >
+    {asChild ? <SlotClone>{props.children}</SlotClone> : props.children}
+  </PopoverPrimitive.Trigger>
+))
+
+PopoverTrigger.displayName = PopoverPrimitive.Trigger.displayName
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
