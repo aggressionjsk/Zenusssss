@@ -69,6 +69,29 @@ class Cache {
   }
 
   /**
+   * Get a value from cache or set it if not exists
+   * @param key The cache key
+   * @param factory A function that returns the value to cache if not found
+   * @param expiryInMs Optional expiry time in milliseconds
+   * @returns The cached or newly generated value
+   */
+  public async getOrSet<T>(key: string, factory: () => Promise<T>, expiryInMs?: number): Promise<T> {
+    // Check if value exists in cache
+    const cachedValue = this.get(key);
+    if (cachedValue !== null) {
+      return cachedValue;
+    }
+    
+    // If not in cache, generate the value
+    const value = await factory();
+    
+    // Store in cache
+    this.set(key, value, expiryInMs);
+    
+    return value;
+  }
+
+  /**
    * Clear all items from the cache
    */
   public clear(): void {
