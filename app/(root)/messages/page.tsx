@@ -125,9 +125,11 @@ const MessagesPage = () => {
 													{otherUser?.name}
 												</h3>
 												<span className="text-xs text-neutral-500">
-													{conversation.lastMessage
+													{conversation.lastMessage && conversation.lastMessage.createdAt
 														? formatDistanceToNowStrict(new Date(conversation.lastMessage.createdAt))
-														: formatDistanceToNowStrict(new Date(conversation.createdAt))}
+														: conversation.createdAt
+															? formatDistanceToNowStrict(new Date(conversation.createdAt))
+															: 'Just now'}
 												</span>
 											</div>
 											<p className="text-sm text-neutral-400 truncate">

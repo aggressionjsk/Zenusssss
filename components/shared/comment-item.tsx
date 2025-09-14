@@ -85,7 +85,7 @@ const CommentItem = ({ comment, user }: Props) => {
 								: comment && sliceText(comment.user.email, 20)}
 						</span>
 						<span className='text-neutral-500 text-sm'>
-							{comment && comment.createdAt && formatDistanceToNowStrict(new Date(comment.createdAt))}
+							{comment && comment.createdAt ? formatDistanceToNowStrict(new Date(comment.createdAt)) : 'Just now'}
 						</span>
 					</div>
 					<div className='text-white mt-1'>

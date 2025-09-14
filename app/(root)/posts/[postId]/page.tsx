@@ -48,7 +48,7 @@ const Page = async ({ params, searchParams }: Props) => {
 									{post && post?.user.username ? `@${sliceText(post.user.username, 20)}` : post && sliceText(post.user.email, 20)}
 								</span>
 								<span className='text-neutral-500 text-sm'>
-									{post && post.createdAt && formatDistanceToNowStrict(new Date(post.createdAt))}
+									{post && post.createdAt ? formatDistanceToNowStrict(new Date(post.createdAt)) : 'Just now'}
 								</span>
 							</div>
 							<div className='text-white mt-1'>{post?.body}</div>

@@ -246,7 +246,7 @@ const ConversationPage = () => {
 												</Avatar>
 											)}
 											<span className="text-xs opacity-70">
-												{formatDistanceToNowStrict(new Date(message.createdAt))}
+												{message.createdAt ? formatDistanceToNowStrict(new Date(message.createdAt)) : 'Just now'}
 											</span>
 											{isOwn && (
 												<button 

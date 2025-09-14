@@ -88,7 +88,8 @@ export async function POST(req: NextRequest) {
 			})
 			
 			// Import the socket server to emit the messages-read event
-			const { io } = await import('@/lib/socket')
+			const { getIO } = await import('@/lib/socket')
+			const io = getIO()
 			if (io) {
 				io.to(conversationId).emit('messages-read', { conversationId })
 			}

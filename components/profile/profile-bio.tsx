@@ -176,7 +176,7 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 						</div>
 						<div className='flex flex-row items-center gap-2 mt-4 text-neutral-500'>
 							<BsCalendar size={24} />
-							<p>Joined {formatDistanceToNowStrict(new Date(user.createdAt))} ago</p>
+							<p>Joined {user.createdAt ? formatDistanceToNowStrict(new Date(user.createdAt)) : 'recently'} ago</p>
 						</div>
 					</div>
 

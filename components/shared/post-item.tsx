@@ -148,7 +148,7 @@ const PostItem = ({ post, user }: Props) => {
 						<span className='text-neutral-500 cursor-pointer hover:underline hidden md:block'>
 							{post.user.username ? `@${sliceText(post.user.username, 16)}` : sliceText(post.user.email, 16)}
 						</span>
-						<span className='text-neutral-500 text-sm'>{formatDistanceToNowStrict(new Date(post.createdAt))} ago</span>
+						<span className='text-neutral-500 text-sm'>{post.createdAt ? formatDistanceToNowStrict(new Date(post.createdAt)) : 'Just now'} ago</span>
 					</div>
 
 					<div className='text-white mt-1'>
