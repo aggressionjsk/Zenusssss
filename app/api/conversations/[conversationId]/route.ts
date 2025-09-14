@@ -18,7 +18,7 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const userId = session.user.id
+		const userId = session.currentUser?._id
 		const { conversationId } = params
 
 		// Find the conversation and verify the user is a participant

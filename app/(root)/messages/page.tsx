@@ -29,7 +29,7 @@ interface Conversation {
 const MessagesPage = () => {
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const userId = searchParams.get('userId')
+	const userId = searchParams?.get('userId')
 	const [conversations, setConversations] = useState<Conversation[]>([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [creatingConversation, setCreatingConversation] = useState(false)

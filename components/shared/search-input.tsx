@@ -12,12 +12,12 @@ const SearchInput = () => {
 
 	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const val = e.target.value
-		const newUrl = formUrlQuery({ params: searchParams.toString(), key: 'q', value: val })
+		const newUrl = formUrlQuery({ params: searchParams?.toString() || '', key: 'q', value: val })
 		router.push(newUrl, { scroll: false })
 		router.refresh()
 
 		if (val == '') {
-			const newUrl = removeUrlQuery({ params: searchParams.toString(), key: 'q' })
+			const newUrl = removeUrlQuery({ params: searchParams?.toString() || '', key: 'q' })
 			router.push(newUrl, { scroll: false })
 		}
 	}

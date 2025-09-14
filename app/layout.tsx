@@ -6,23 +6,23 @@ import { Provider } from "./provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	metadataBase: new URL('https://x.sammi.ac'),
+	metadataBase: new URL('https://zneus.space'),
 	title: 'Twitter X',
-	description: 'Twitter X is a Twitter clone built by Sammi.ac',
-	authors: [{ name: 'Samar Badriddinov', url: 'https://x.sammi.ac' }],
+	description: 'Zenus is inspired by the Twitter',
+	authors: [{ name: 'Behzod Odiljonov', url: 'https://zneus.space' }],
 	 icons: { icon: "/images/x.svg" },
 	openGraph: {
-		title: 'Twitter X',
-		description: "Twitter X is a Twitter clone built by Sammi.ac",
+		title: 'Zenus',
+		description: "Zenus is Best One",
 		type: 'website',
-		url: 'https://x.sammi.ac',
+		url: 'https://zneus.space',
 		locale: 'uz_UZ',
-		images: 'https://media.graphassets.com/3XlUA3OBSjaQcMNFYnVv',
+		images: 'https://www.canva.com/design/DAGwgyuutR4/qUG_4Rr2AEuBGiWtaGRuQQ/view?utm_content=DAGwgyuutR4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hcb2b8f3567',
 		countryName: 'Uzbekistan',
-		siteName: 'Sammi',
-		emails: 'info@sammi.ac',
+		siteName: 'Zenus',
+		emails: 'behosh304@gmail.com',
 	},
-	keywords: "Twitter, Twitter web, twitter clone, twitter web application, Ilon, Ilon Mask, samar badriddinov"
+	keywords: "Twitter, Twitter web, twitter clone, twitter web application, Ilon, Ilon Mask, behzod odiljonov"
 }
 
 export default function RootLayout({

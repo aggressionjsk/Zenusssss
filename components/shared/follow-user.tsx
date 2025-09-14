@@ -21,7 +21,8 @@ const FollowUser = ({ user, setFollowing }: Props) => {
 
 	const router = useRouter()
 	const { data: session } = useSession()
-	const { userId } = useParams<{ userId: string }>()
+	const params = useParams<{ userId: string }>()
+	const userId = params?.userId
 
 	const onFollow = async () => {
 		setIsLoading(true)
@@ -37,7 +38,7 @@ const FollowUser = ({ user, setFollowing }: Props) => {
 			if (userId === session?.currentUser?._id) {
 				setFollowing(prev => [
 					...prev,
-					{ ...user, followers: [...user.followers.filter(f => f !== undefined), session.currentUser?._id as string] },
+					{ ...user, followers: [...user.followers.filter(f => f !== undefined), session?.currentUser?._id as string] },
 				])
 			}
 			setProfile(prev => ({

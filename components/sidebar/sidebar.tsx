@@ -1,19 +1,47 @@
 'use client'
 
-import { Bell, Home, User } from 'lucide-react'
+import { Bell, Home, User, MessageCircle, Search, Bookmark, Calendar } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import SidebarItem from './sidebar-item'
 import SidebarPostButton from './sidebar-post-button'
 import SidebarAccount from './sidebar-account'
 import { IUser } from '@/types'
-import { Search } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
 
 const Sidebar = ({ user }: { user: IUser }) => {
+	const [hasUnreadMessages, setHasUnreadMessages] = useState(false)
+
+	// Check for unread messages
+	useEffect(() => {
+		const checkUnreadMessages = async () => {
+			try {
+				const response = await axios.get('/api/conversations')
+				const conversations = response.data
+				
+				// Check if any conversation is unread
+				const hasUnread = conversations.some((conversation: any) => !conversation.isRead)
+				setHasUnreadMessages(hasUnread)
+			} catch (error) {
+				console.error('Error checking unread messages:', error)
+			}
+		}
+
+		checkUnreadMessages()
+
+		// Set up interval to check periodically
+		const interval = setInterval(checkUnreadMessages, 30000) // Check every 30 seconds
+		return () => clearInterval(interval)
+	}, [])
+
 	const sidebarItems = [
 		{ label: 'Home', path: '/', icon: Home },
 		{ label: 'Notifications', path: `/notifications/${user?._id}`, icon: Bell, notification: user?.hasNewNotifications },
+		{ label: 'Messages', path: '/messages', icon: MessageCircle, notification: hasUnreadMessages },
 		{ label: 'Profile', path: `/profile/${user?._id}`, icon: User },
+		{ label: 'Saved', path: '/saved', icon: Bookmark },
+		{ label: 'Scheduled', path: '/scheduled-posts', icon: Calendar },
 		{ label: 'Explore', path: '/explore', icon: Search },
 	]
 

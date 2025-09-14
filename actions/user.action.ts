@@ -159,7 +159,7 @@ export const updateUser = actionClient.schema(updateUserSchema).action<ReturnAct
 		}
 		
 		// Convert birthDate string to Date object if it exists
-		const updateData = { ...parsedInput }
+		const updateData: any = { ...parsedInput }
 		if (updateData.birthDate) {
 			updateData.birthDate = new Date(updateData.birthDate)
 		}

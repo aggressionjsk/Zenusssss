@@ -6,6 +6,13 @@ import { Toaster } from "@/components/ui/toaster";
 import NextTopLoader from "nextjs-toploader";
 import FollowBar from "@/components/shared/follow-bar";
 import Sidebar from "@/components/sidebar/sidebar";
+import dynamic from "next/dynamic";
+
+// Dynamically import SessionTracker with no SSR to avoid hydration issues
+const SessionTracker = dynamic(
+  () => import("@/components/shared/session-tracker"),
+  { ssr: false }
+);
 
 interface Props {
   children: React.ReactNode;
@@ -41,6 +48,7 @@ const Layout = async ({ children }: Props) => {
             />
             {children}
             <Toaster />
+            <SessionTracker />
           </div>
         </div>
         <FollowBar />

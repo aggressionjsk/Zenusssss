@@ -38,6 +38,7 @@ export interface IPost {
 	_id: string
 	hasLiked: boolean
 	linkUrl?: string
+	isSaved?: boolean
 }
 
 export interface ReturnActionType {
@@ -50,4 +51,7 @@ export interface ReturnActionType {
 	users?: IUser[]
 	notifications?: IPost[]
 	user?: IUser
+	forceLogout?: boolean
+	shouldSignOut?: boolean
+	message?: string
 }

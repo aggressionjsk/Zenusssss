@@ -39,7 +39,15 @@ export const authOptions: AuthOptions = {
 
       const isExistingUser = await User.findOne({ email: session.user.email });
 
+      // If user has been deleted, invalidate the session
       if (!isExistingUser) {
+        // Check if this is a new user or a deleted user
+        if (session.currentUser?._id) {
+          // User was deleted, return null to invalidate session
+          return null;
+        }
+        
+        // This is a new user, create their account
         const newUser = await User.create({
           email: session.user.email,
           name: session.user.name,
@@ -47,9 +55,13 @@ export const authOptions: AuthOptions = {
         });
 
         session.currentUser = newUser;
+        // Set user.id to match MongoDB _id for proper identification
+        session.user.id = String(newUser._id);
+      } else {
+        session.currentUser = isExistingUser;
+        // Set user.id to match MongoDB _id for proper identification
+        session.user.id = String(isExistingUser._id);
       }
-
-      session.currentUser = isExistingUser;
 
       return session;
     },

@@ -18,7 +18,7 @@ const Pagination: FC<Props> = ({ isNext, pageNumber }) => {
 
 		const newUrl = formUrlQuery({
 			key: 'page',
-			params: searchParams.toString(),
+			params: searchParams?.toString() || '',
 			value: nextPageNumber.toString(),
 		})
 		router.push(newUrl)

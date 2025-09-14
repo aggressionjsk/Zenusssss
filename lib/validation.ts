@@ -42,10 +42,16 @@ export const paramsSchema = z.object({
 
 export const createPostSchema = z.object({
 	body: z.string().min(3),
+	scheduledFor: z.date().optional(),
 })
 
 export const idSchema = z.object({
 	id: z.string(),
+})
+
+export const scheduledPostSchema = z.object({
+	body: z.string().min(3),
+	scheduledFor: z.date(),
 })
 
 export const createCommentSchema = z.object({}).merge(createPostSchema).merge(idSchema)

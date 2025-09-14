@@ -4,7 +4,7 @@ import { IUser } from '@/types'
 import React, { useState } from 'react'
 import Button from '../ui/button'
 import { IoLocationSharp } from 'react-icons/io5'
-import * as Bi from 'react-icons/bi'
+import { BsCalendar, BsCalendarEvent as BiBirthdayCake } from 'react-icons/bs'
 import { FaBitcoin, FaCopy } from 'react-icons/fa'
 import { formatDistanceToNowStrict } from 'date-fns'
 import EditModal from '../modals/edit-modal'
@@ -169,13 +169,13 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 							)}
 							{user.birthDate && (
 								<div className='flex flex-row items-center gap-2 text-purple-500'>
-									<Bi.BiBirthdayCake size={24} />
+									<BiBirthdayCake size={24} />
 									<p>{new Date(user.birthDate).toLocaleDateString()}</p>
 								</div>
 							)}
 						</div>
 						<div className='flex flex-row items-center gap-2 mt-4 text-neutral-500'>
-							<Bi.BiCalendar size={24} />
+							<BsCalendar size={24} />
 							<p>Joined {formatDistanceToNowStrict(new Date(user.createdAt))} ago</p>
 						</div>
 					</div>

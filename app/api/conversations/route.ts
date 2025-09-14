@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const userId = session.user.id
+		const userId = session.currentUser?._id
 
 		// Find all conversations where the current user is a participant
 		const conversations = await Conversation.find({
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const { participantId } = await req.json()
-		const currentUserId = session.user.id
+		const currentUserId = session.currentUser?._id
 
 		if (!participantId) {
 			return NextResponse.json(

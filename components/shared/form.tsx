@@ -10,6 +10,8 @@ import useAction from '@/hooks/use-action'
 import { createComment } from '@/actions/comment.action'
 import { useParams } from 'next/navigation'
 import FormattingToolbar from './formatting-toolbar'
+import SchedulePostButton from './schedule-post-button'
+import { createScheduledPost } from '@/actions/scheduled-post.action'
 
 interface Props {
 	placeholder: string
@@ -21,7 +23,9 @@ interface Props {
 const Form = ({ placeholder, user, isComment }: Props) => {
 	const { isLoading, setIsLoading, onError } = useAction()
 	const [body, setBody] = useState('')
-	const { postId } = useParams<{ postId: string }>() 
+	const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined)
+	const params = useParams<{ postId: string }>()
+	const postId = params?.postId
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 
 	const handleFormat = (formatType: 'bold' | 'italic' | 'unordered-list' | 'ordered-list') => {
@@ -86,9 +90,19 @@ const Form = ({ placeholder, user, isComment }: Props) => {
 	const onSubmit = async () => {
 		setIsLoading(true)
 		let res
-		if (isComment) {
+		if (isComment && postId) {
 			res = await createComment({ body, id: postId })
+		} else if (scheduledDate && scheduledDate.getTime() > Date.now()) {
+			// Create a scheduled post
+			res = await createScheduledPost({ body, scheduledFor: scheduledDate })
+			if (res?.data?.status === 200) {
+				toast({ 
+					title: 'Post Scheduled', 
+					description: `Your post will be published on ${scheduledDate.toLocaleDateString()} at ${scheduledDate.toLocaleTimeString()}` 
+				})
+			}
 		} else {
+			// Create a regular post
 			res = await createPost({ body })
 		}
 		if (res?.serverError || res?.validationErrors || !res?.data) {
@@ -98,8 +112,11 @@ const Form = ({ placeholder, user, isComment }: Props) => {
 			return onError(res.data.failure)
 		}
 		if (res.data.status === 200) {
-			toast({ title: 'Success', description: 'Tweet created successfully' })
+			if (!scheduledDate || scheduledDate.getTime() <= Date.now()) {
+				toast({ title: 'Success', description: 'Post created successfully' })
+			}
 			setBody('')
+			setScheduledDate(undefined)
 		}
 		setIsLoading(false)
 	}
@@ -126,17 +143,25 @@ const Form = ({ placeholder, user, isComment }: Props) => {
 					<hr className='opacity-0 peer-focus:opacity-100 h-[1px] w-full border-neutral-800 transition' />
 					
 					<div className='mt-4 flex flex-row justify-between items-center'>
+					<div className="flex items-center gap-2">
 						<div className="text-xs text-neutral-500">
 							Use **bold**, *italic*, - for lists
 						</div>
-						<Button
-							label={isComment ? 'Reply' : 'Post'}
-							classNames='px-8'
-							disabled={isLoading || !body}
-							onClick={onSubmit}
-							isLoading={isLoading}
-						/>
+						{!isComment && (
+							<SchedulePostButton 
+								onSchedule={setScheduledDate} 
+								scheduledDate={scheduledDate} 
+							/>
+						)}
 					</div>
+					<Button
+						label={isComment ? 'Reply' : scheduledDate && scheduledDate.getTime() > Date.now() ? 'Schedule' : 'Post'}
+						classNames='px-8'
+						disabled={isLoading || !body}
+						onClick={onSubmit}
+						isLoading={isLoading}
+					/>
+				</div>
 				</div>
 			</div>
 		</div>

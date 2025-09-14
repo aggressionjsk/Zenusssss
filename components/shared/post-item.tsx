@@ -1,19 +1,22 @@
 'use client'
 
 import { IPost, IUser } from '@/types'
-import React, { MouseEvent, useState } from 'react'
+import React, { MouseEvent, useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { sliceText } from '@/lib/utils'
 import { formatDistanceToNowStrict } from 'date-fns'
 import { AiFillDelete, AiOutlineMessage } from 'react-icons/ai'
-import { FaHeart } from 'react-icons/fa'
+import { FaHeart, FaBookmark, FaRegBookmark } from 'react-icons/fa'
 import { toast } from '../ui/use-toast'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import useAction from '@/hooks/use-action'
 import { deleteLike, deletePost, likePost } from '@/actions/post.action'
+import { savePost, unsavePost } from '@/actions/saved-post.action'
 import LinkPreview from './link-preview'
 import FormattedText from './formatted-text'
+import { trackUserInteraction } from '@/lib/user-preference-service'
 
 interface Props {
 	post: IPost
@@ -22,8 +25,22 @@ interface Props {
 
 const PostItem = ({ post, user }: Props) => {
 	const { isLoading, setIsLoading, onError } = useAction()
+	// Track if post is saved (from post.isSaved if available)
+	const [isSaved, setIsSaved] = useState(post.isSaved || false)
+	const [hasViewed, setHasViewed] = useState(false)
 
 	const router = useRouter()
+	
+	// Track post view when component mounts
+	useEffect(() => {
+		if (!hasViewed && user?._id && post?._id) {
+			trackUserInteraction({
+				postId: post._id,
+				interactionType: 'view'
+			})
+			setHasViewed(true)
+		}
+	}, [post._id, user?._id, hasViewed])
 
 	const onDelete = async (e: MouseEvent<HTMLDivElement>) => {
 		e.stopPropagation()
@@ -49,6 +66,11 @@ const PostItem = ({ post, user }: Props) => {
 			res = await deleteLike({ id: post._id })
 		} else {
 			res = await likePost({ id: post._id })
+			// Track like interaction for feed personalization
+			trackUserInteraction({
+				postId: post._id,
+				interactionType: 'like'
+			})
 		}
 		if (res?.serverError || res?.validationErrors || !res?.data) {
 			return onError('Something went wrong')
@@ -60,8 +82,43 @@ const PostItem = ({ post, user }: Props) => {
 			setIsLoading(false)
 		}
 	}
+	
+	const onSavePost = async (e: React.MouseEvent<HTMLDivElement>) => {
+		e.stopPropagation()
+		setIsLoading(true)
+		let res
+		if (isSaved) {
+			res = await unsavePost({ id: post._id })
+		} else {
+			res = await savePost({ id: post._id })
+			// Track save interaction for feed personalization
+			trackUserInteraction({
+				postId: post._id,
+				interactionType: 'save'
+			})
+		}
+		if (res?.serverError || res?.validationErrors || !res?.data) {
+			return onError('Something went wrong')
+		}
+		if (res.data.failure) {
+			return onError(res.data.failure)
+		}
+		if (res.data.status === 200) {
+			setIsSaved(!isSaved)
+			toast({ 
+				title: 'Success', 
+				description: isSaved ? 'Post removed from saved items' : 'Post saved for later' 
+			})
+			setIsLoading(false)
+		}
+	}
 
 	const goToPost = () => {
+		// Track comment view interaction when user goes to post detail
+		trackUserInteraction({
+			postId: post._id,
+			interactionType: 'comment'
+		})
 		router.push(`/posts/${post._id}`)
 	}
 
@@ -117,6 +174,25 @@ const PostItem = ({ post, user }: Props) => {
 								className={`transition-transform duration-300 ${post.hasLiked ? 'scale-125' : 'scale-100'} hover:scale-110`}
 							/>
 							<p>{post.likes || 0}</p>
+						</div>
+
+						<div
+							className={`flex flex-row items-center text-neutral-500 gap-2 cursor-pointer transition hover:text-amber-500`}
+							onClick={onSavePost}
+							role='button'
+						>
+							{isSaved ? (
+								<FaBookmark 
+									size={20} 
+									color="#f59e0b" 
+									className="transition-transform duration-300 scale-110 hover:scale-125"
+								/>
+							) : (
+								<FaRegBookmark 
+									size={20} 
+									className="transition-transform duration-300 hover:scale-110"
+								/>
+							)}
 						</div>
 
 						{post.user._id === user._id && (

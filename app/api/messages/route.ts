@@ -18,7 +18,7 @@ export async function DELETE(req: NextRequest) {
 		}
 
 		const { messageId } = await req.json()
-		const userId = session.user.id
+		const userId = session.currentUser?._id
 
 		if (!messageId) {
 			return NextResponse.json(
@@ -79,58 +79,174 @@ export async function POST(req: NextRequest) {
 
 		const session = await getServerSession(authOptions)
 		if (!session?.user) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+			return NextResponse.json({ error: 'Unauthorized', success: false }, { status: 401 })
 		}
 
-		const { conversationId, content } = await req.json()
-		const senderId = session.user.id
+		let body;
+		try {
+			body = await req.json()
+		} catch (error) {
+			return NextResponse.json({ 
+				error: 'Invalid request body', 
+				success: false,
+				details: 'The request body could not be parsed as JSON'
+			}, { status: 400 })
+		}
 
-		if (!conversationId || !content) {
+		const { conversationId, content } = body
+		const senderId = session.currentUser?._id
+
+		if (!conversationId) {
 			return NextResponse.json(
-				{ error: 'Conversation ID and content are required' },
+				{ error: 'Conversation ID is required', success: false },
+				{ status: 400 }
+			)
+		}
+
+		if (!content || typeof content !== 'string' || content.trim() === '') {
+			return NextResponse.json(
+				{ error: 'Valid message content is required', success: false },
 				{ status: 400 }
 			)
 		}
 
 		// Verify the conversation exists and the user is a participant
-		const conversation = await Conversation.findOne({
-			_id: conversationId,
-			participants: { $in: [senderId] },
-		})
+		let conversation;
+		try {
+			conversation = await Conversation.findOne({
+				_id: conversationId,
+				participants: { $in: [senderId] },
+			})
+		} catch (error) {
+			return NextResponse.json({
+				error: 'Invalid conversation ID format',
+				success: false,
+				details: 'The provided conversation ID is not valid'
+			}, { status: 400 })
+		}
 
 		if (!conversation) {
-			return NextResponse.json(
-				{ error: 'Conversation not found' },
-				{ status: 404 }
-			)
+			return NextResponse.json({
+				error: 'Conversation not found or you are not a participant',
+				success: false,
+				details: 'The conversation may not exist or you may not have permission to access it'
+			}, { status: 404 })
 		}
 
 		// Create the message
-		const newMessage = await Message.create({
-			conversation: conversationId,
-			sender: senderId,
-			content,
-			isRead: false,
-		})
+		let newMessage;
+		try {
+			newMessage = await Message.create({
+				conversation: conversationId,
+				sender: senderId,
+				content,
+				isRead: false,
+				createdAt: new Date()
+			})
+		} catch (error) {
+			console.error('Error creating message:', error);
+			return NextResponse.json({
+				error: 'Failed to create message',
+				success: false,
+				details: 'There was an error saving your message'
+			}, { status: 500 })
+		}
 
 		// Update the conversation's lastMessage and mark as unread
-		await Conversation.findByIdAndUpdate(conversationId, {
-			lastMessage: newMessage._id,
-			isRead: false,
-		})
+		try {
+			await Conversation.findByIdAndUpdate(conversationId, {
+				lastMessage: newMessage._id,
+				isRead: false,
+				updatedAt: new Date()
+			})
+		} catch (error) {
+			console.error('Error updating conversation:', error);
+			// Message was created but conversation update failed
+			// We'll still return the message but log the error
+		}
+
+		// Get the other participant to create a notification
+		const otherParticipant = conversation.participants.find(
+			(participant: any) => participant.toString() !== senderId
+		);
+
+		if (otherParticipant) {
+			try {
+				// Import the notification model
+				const Notification = (await import('@/database/notification.model')).default;
+				const User = (await import('@/database/user.model')).default;
+
+				// Create a notification for the recipient
+				await Notification.create({
+					user: otherParticipant,
+					body: `You have a new message`,
+					createdAt: new Date()
+				});
+
+				// Update the recipient's hasNewNotifications flag
+				await User.findByIdAndUpdate(otherParticipant, {
+					$set: { hasNewNotifications: true },
+				});
+			} catch (error) {
+				console.error('Error creating notification:', error);
+				// We'll still continue since the message was created successfully
+				// This is a non-critical error that shouldn't block the message creation
+			}
+		}
 
 		// Populate the sender information
-		const populatedMessage = await Message.findById(newMessage._id).populate({
-			path: 'sender',
-			select: 'name username profileImage',
-		})
+		let populatedMessage;
+		try {
+			populatedMessage = await Message.findById(newMessage._id).populate({
+				path: 'sender',
+				select: 'name username profileImage',
+			})
 
-		return NextResponse.json(populatedMessage)
+			if (!populatedMessage) {
+				// This should rarely happen, but just in case
+				return NextResponse.json({
+					message: newMessage,
+					success: true,
+					warning: 'Message created but sender details could not be populated'
+				})
+			}
+
+			return NextResponse.json({
+				message: populatedMessage,
+				success: true
+			})
+		} catch (error) {
+			console.error('Error populating message:', error);
+			// Return the unpopulated message as a fallback
+			return NextResponse.json({
+				message: newMessage,
+				success: true,
+				warning: 'Message created but sender details could not be populated'
+			})
+		}
 	} catch (error) {
 		console.error('Error creating message:', error)
+		let errorMessage = 'Failed to create message';
+		let statusCode = 500;
+
+		// Provide more specific error messages based on error type
+		if (error instanceof Error) {
+			if (error.name === 'ValidationError') {
+				errorMessage = 'Message validation failed';
+				statusCode = 400;
+			} else if (error.name === 'MongoServerError' && (error as any).code === 11000) {
+				errorMessage = 'Duplicate message detected';
+				statusCode = 409;
+			}
+		}
+
 		return NextResponse.json(
-			{ error: 'Failed to create message' },
-			{ status: 500 }
+			{ 
+				error: errorMessage,
+				success: false,
+				details: error instanceof Error ? error.message : 'Unknown error occurred'
+			},
+			{ status: statusCode }
 		)
 	}
 }
