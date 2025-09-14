@@ -15,9 +15,7 @@ export function middleware(request: NextRequest) {
 // Configure the middleware to run for specific paths
 export const config = {
   matcher: [
-    // Match all API routes
-    '/api/:path*',
-    // Specifically match socket.io routes
-    '/api/socket/io',
+    // Match all API routes except socket.io
+    '/api/((?!socket/io).*)'
   ],
 };

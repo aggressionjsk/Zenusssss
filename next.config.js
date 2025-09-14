@@ -19,6 +19,8 @@ const nextConfig = {
       allowedForwardedHosts: ["*"]
     },
   },
+  // Ensure Socket.io works properly on Vercel
+  transpilePackages: ["socket.io", "socket.io-client", "engine.io-client"],
 };
 
 module.exports = nextConfig;

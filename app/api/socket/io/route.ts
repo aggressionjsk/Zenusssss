@@ -4,6 +4,7 @@ import { setIO } from '@/lib/socket';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs'; // Ensure Node.js runtime for Socket.io
 
 const ioHandler = (req: NextRequest) => {
   if (!req.nextUrl.pathname.startsWith('/api/socket/io')) {
@@ -23,10 +24,20 @@ const ioHandler = (req: NextRequest) => {
     // Get the underlying socket from the response
     const responseSocket = res.socket as any;
     
+    if (!responseSocket) {
+      console.error('Socket not available');
+      return new Response('Socket not available', { status: 500 });
+    }
+    
     // Create a new Socket.IO server instance
     const io = new ServerIO(responseSocket.server, {
       path: '/api/socket/io',
       addTrailingSlash: false,
+      cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+      },
+      transports: ['websocket', 'polling'],
     });
 
     // Set the Socket.IO instance and initialize event handlers
