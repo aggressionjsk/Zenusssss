@@ -11,12 +11,13 @@ import EditModal from '../modals/edit-modal'
 import useEditModal from '@/hooks/useEditModal'
 import Modal from '../ui/modal'
 import { cn } from '@/lib/utils'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MessageCircle as MessageCircleIcon } from 'lucide-react'
 import FollowUser from '../shared/follow-user'
 import useAction from '@/hooks/use-action'
 import { follow, getFollowUser, unfollow } from '@/actions/user.action'
 import { useSession } from 'next-auth/react'
 import Badge from '../shared/badge'
+import { useRouter } from 'next/navigation'
 
 const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 	const { isLoading, setIsLoading, onError } = useAction()
@@ -27,6 +28,7 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 	const [state, setState] = useState<'following' | 'followers'>('following')
 	const [copied, setCopied] = useState(false)
 	const editModal = useEditModal()
+	const router = useRouter()
 
 	const onFollow = async () => {
 		setIsLoading(true)
@@ -107,13 +109,23 @@ const ProfileBio = ({ user, userId }: { user: IUser; userId: string }) => {
 		<>
 			<EditModal user={user} />
 			<div className='border-b-[1px] border-neutral-800 pb-4'>
-				<div className='flex justify-end p-2'>
+				<div className='flex justify-end p-2 gap-2'>
 					{userId === user._id ? (
 						<Button label={'Edit profile'} secondary onClick={() => editModal.onOpen()} />
-					) : user.isFollowing ? (
-						<Button label={'Unfollow'} outline onClick={onUnfollow} disabled={isLoading} isLoading={isLoading} />
 					) : (
-						<Button label={'Follow'} onClick={onFollow} disabled={isLoading} isLoading={isLoading} />
+						<>
+							{user.isFollowing ? (
+								<Button label={'Unfollow'} outline onClick={onUnfollow} disabled={isLoading} isLoading={isLoading} />
+							) : (
+								<Button label={'Follow'} onClick={onFollow} disabled={isLoading} isLoading={isLoading} />
+							)}
+							<Button 
+							label={''} 
+							icon={MessageCircleIcon} 
+							onClick={() => router.push(`/messages?userId=${user._id}`)} 
+							secondary 
+						/>
+						</>
 					)}
 				</div>
 

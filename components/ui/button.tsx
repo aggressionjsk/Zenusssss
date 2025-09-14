@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
 import { ReactNode } from 'react'
+import { IconType } from 'react-icons'
 
 interface ButtonProps {
 	label: ReactNode | string
@@ -13,6 +14,8 @@ interface ButtonProps {
 	onClick?: () => void
 	classNames?: string
 	isLoading?: boolean
+	icon?: IconType | any
+	iconSize?: number
 }
 
 export default function Button({
@@ -26,6 +29,8 @@ export default function Button({
 	type,
 	classNames,
 	isLoading,
+	icon: Icon,
+	iconSize = 20,
 }: ButtonProps) {
 	return (
 		<button
@@ -42,6 +47,7 @@ export default function Button({
 			)}
 		>
 			<span>{label}</span>
+			{Icon && <Icon size={iconSize} className={label ? 'ml-2' : ''} />}
 			{isLoading && <Loader2 className='w-4 h-4 ml-2 animate-spin' />}
 		</button>
 	)
