@@ -13,6 +13,12 @@ const nextConfig = {
     });
     return config;
   },
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["localhost:3000", "vercel.app"],
+      allowedForwardedHosts: ["*"]
+    },
+  },
 };
 
 module.exports = nextConfig;

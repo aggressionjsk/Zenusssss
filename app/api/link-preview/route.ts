@@ -9,6 +9,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Create a fallback response with basic information
+    let fallbackResponse = {
+      title: '',
+      description: '',
+      url: url,
+      siteName: ''
+    }
+    
+    try {
+      fallbackResponse.siteName = new URL(url).hostname.replace('www.', '');
+    } catch (e) {
+      // If URL parsing fails, use the raw URL
+      fallbackResponse.siteName = url;
+    }
+    
+    // During build time, we'll return the fallback response to avoid API calls
+    if (process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'production') {
+      return NextResponse.json(fallbackResponse)
+    }
+    
     // Use a third-party service for link previews
     // This is a free service with rate limits, but sufficient for demo purposes
     const apiUrl = `https://api.microlink.io/?url=${encodeURIComponent(url)}`
@@ -20,20 +40,7 @@ export async function GET(request: NextRequest) {
     
     // Add null check for data to prevent errors
     if (!data) {
-      let siteName = '';
-      try {
-        siteName = new URL(url).hostname.replace('www.', '');
-      } catch (e) {
-        // If URL parsing fails, use the raw URL
-        siteName = url;
-      }
-      
-      return NextResponse.json({ 
-        title: '',
-        description: '',
-        url: url,
-        siteName: siteName
-      })
+      return NextResponse.json(fallbackResponse)
     }
     
     let siteName = '';

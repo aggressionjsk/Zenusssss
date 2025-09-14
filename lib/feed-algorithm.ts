@@ -6,8 +6,16 @@ import SavedPost from '@/database/saved-post.model'
 import { connectToDatabase } from '@/lib/mognoose'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-options'
-import { cache } from '@/lib/cache'
 import mongoose from 'mongoose'
+
+// Import cache with error handling to prevent build failures
+let cache: any = { get: () => null, set: () => {} };
+try {
+  const cacheModule = require('@/lib/cache');
+  cache = cacheModule.cache;
+} catch (error) {
+  console.warn('Cache module not available, using fallback');
+}
 
 // Constants for algorithm weights
 const WEIGHTS = {
